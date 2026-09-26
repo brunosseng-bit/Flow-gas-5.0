@@ -71,6 +71,7 @@
           <div class="progress"><div class="progress-fill" id="metaBar" style="width:0%"></div></div>
           <span class="mc-pct" id="metaPct">0%</span>
         </div>
+        <div class="mc-pipe" id="metaPipeV45"></div>
         <div class="meta-stats" id="metaStats" hidden></div>
       </div>
 
@@ -124,8 +125,9 @@
       <button class="chip" data-f="alta">🔥 Alta</button>
       <button class="chip" data-f="media">🟡 Média</button>
       <button class="chip" data-f="baixa">🔵 Baixa</button>
-      <button class="chip" data-f="Negociação">Negociação</button>
-      <button class="chip" data-f="Proposta">Proposta</button>
+      <button class="chip" data-f="Assembleia agendada">🗳️ Assembleia</button>
+      <span id="opsCityChips" style="display:contents"></span>
+      <button class="chip" data-f="Perdida">❌ Perdidas</button>
     </div>
     <div class="content" style="padding-top:8px;" id="opsList"></div>
     <nav class="bottom-nav">
@@ -158,6 +160,7 @@
     <div class="content">
       <div class="card">
         <div class="form-field"><label>Nome do cliente *</label><input type="text" id="f-name" placeholder="Ex: Condomínio Alfa"></div>
+        <div class="form-field"><label>Grupo <span style="font-weight:500;text-transform:none;letter-spacing:0">(mesmo síndico, administradora ou conjunto)</span></label><input type="text" id="f-group" list="groupListV44" placeholder="Ex.: Grupo Parque" autocomplete="off"><datalist id="groupListV44"></datalist></div>
         <div class="form-2col">
           <div class="form-field"><label>Tipo *</label>
             <select id="f-type"><option>Residencial</option><option>Comércio</option><option>Indústria</option><option>Restaurante</option><option>Hotel</option><option>Outro</option></select>
@@ -251,8 +254,9 @@
         </div>
         <div class="form-field"><label>Próximo passo</label><input type="text" id="f-nextAction" placeholder="Ex: ligar dia 12 para agendar reunião"></div>
         <div class="form-field"><label>Etapa inicial</label>
-          <select id="f-stage"><option>Prospecção</option><option>Diagnóstico</option><option>Apresentação</option><option>Avaliação</option><option>Visita técnica</option><option>Proposta</option><option>Negociação</option><option>Fechamento</option></select>
+          <select id="f-stage"><option>Prospecção</option><option>Visita técnica</option><option>Apresentação ao síndico</option><option>Reunião com conselho</option><option>Assembleia agendada</option><option>Assembleia aprovada</option><option>Aprovação CAR</option><option>Contrato fechado</option><option>Perdida</option></select>
         </div>
+        <label class="car-check"><input type="checkbox" id="f-needsCar"> Depende de expansão de rede (aprovação CAR)</label>
       </div>
       <button class="btn-primary" onclick="saveNovaOp()">SALVAR OPORTUNIDADE</button>
     </div>
@@ -545,6 +549,27 @@
       <div><h2>Configurações</h2><div class="sub">IA, tarifas, voz e backup</div></div>
     </div>
     <div class="content">
+
+      <div class="card">
+        <div class="card-title">🎯 Meta e pipeline</div>
+        <div class="form-field"><label>Meta mensal (UDA fechadas)</label><input type="number" id="cfg-goal" min="1" inputmode="numeric"></div>
+        <div class="form-field"><label>UDA de leads fora do app (somam no Global)</label><input type="number" id="cfg-goal-extra" min="0" inputmode="numeric" placeholder="Ex.: lista pausada, leads validados"></div>
+        <label class="car-check"><input type="checkbox" id="cfg-goal-training"> Somar pontos de treino na meta</label>
+        <button class="btn-secondary" onclick="saveGoalV45()">SALVAR META</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📍 Rotas da semana</div>
+        <div style="font-size:13px;color:var(--texto-sec);margin-bottom:10px;">Cidade de cada dia. No dia da rota, o card "Agora" mostra primeiro os clientes dessa cidade.</div>
+        <div class="route-grid">
+          <label>Seg</label><input type="text" id="cfg-route-1" placeholder="—">
+          <label>Ter</label><input type="text" id="cfg-route-2" placeholder="—">
+          <label>Qua</label><input type="text" id="cfg-route-3" placeholder="—">
+          <label>Qui</label><input type="text" id="cfg-route-4" placeholder="—">
+          <label>Sex</label><input type="text" id="cfg-route-5" placeholder="—">
+        </div>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="saveRoutesV43()">SALVAR ROTAS</button>
+      </div>
 
       <div class="card">
         <div class="card-title">⚙️ Tarifas e Incentivos</div>
@@ -1759,6 +1784,81 @@
 .score-ring{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .score-ring div{width:40px;height:40px;border-radius:50%;background:#16325f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff}
 
+/* ================= V43 — FUNIL NECTA, ASSEMBLEIA, PERDIDA, ROTAS ================= */
+.car-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texto-sec);font-weight:600;margin:4px 0 12px;cursor:pointer}
+.car-check input{width:18px;height:18px;accent-color:var(--azul);flex-shrink:0}
+.stepper-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--cinza-borda)}
+.stepper-foot .car-check{margin:0;font-size:12.5px}
+.lost-btn{background:none;border:0;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--vermelho);cursor:pointer;white-space:nowrap;padding:4px}
+.stepper-card.lost{border-left:4px solid var(--vermelho)}
+.asm-line{margin-top:10px;font-size:13.5px;background:var(--azul-claro);color:var(--texto);border-radius:10px;padding:9px 12px}
+.asm-line button{background:none;border:0;color:var(--azul);font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;float:right}
+.asm-chip{display:inline-block;margin:6px 0 0 6px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;background:#F1E8FD;color:#6B3FB3}
+.opp-card.perdida{border-left-color:#B8C0CF;opacity:.8}
+.route-chip{font-size:13px;color:var(--texto);background:var(--verde-claro);border-radius:10px;padding:8px 12px;margin-bottom:10px}
+.in-route{font-size:11px;font-weight:800;color:var(--verde);background:var(--verde-claro);padding:2px 7px;border-radius:99px;vertical-align:2px}
+.route-grid{display:grid;grid-template-columns:40px 1fr;gap:8px 10px;align-items:center}
+.route-grid label{font-size:13px;font-weight:700;color:var(--texto-sec)}
+.route-grid input{border:1.5px solid var(--cinza-borda);border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;width:100%}
+.v43-overlay{position:fixed;inset:0;background:rgba(10,31,68,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center}
+.v43-modal{background:#fff;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:20px 18px 26px}
+.v43-kick{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--azul)}
+.v43-title{font-size:18px;font-weight:800;margin:4px 0 6px}
+.v43-sub{font-size:13.5px;color:var(--texto-sec);margin-bottom:6px;line-height:1.4}
+.v43-modal label{display:block;font-size:12.5px;font-weight:700;color:var(--texto-sec);margin:12px 0 5px}
+.v43-modal input,.v43-modal select,.v43-modal textarea{width:100%;border:1.5px solid var(--cinza-borda);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit}
+.v43-btns{display:flex;gap:8px;margin-top:16px}
+.v43-btns button{flex:1;font-family:inherit;font-size:14px;font-weight:800;padding:12px;border-radius:12px;border:1px solid var(--cinza-borda);background:#fff;cursor:pointer}
+.v43-btns button.go{background:var(--verde);border-color:var(--verde);color:#fff}
+.v43-btns button.go.danger{background:var(--vermelho);border-color:var(--vermelho)}
+
+/* V46 — fechamento semanal */
+.now-links{display:flex;gap:4px}
+.wk-modal{max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0}
+.wk-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.wk-close{background:var(--cinza-bg);border:0;width:34px;height:34px;border-radius:50%;font-size:15px;cursor:pointer;flex-shrink:0}
+.wk-seg{display:flex;background:var(--cinza-bg);border-radius:12px;padding:3px;margin:10px 0}
+.wk-seg button{flex:1;border:0;background:none;font-family:inherit;font-weight:700;font-size:13.5px;padding:8px;border-radius:10px;color:var(--texto-sec);cursor:pointer}
+.wk-seg button.on{background:#fff;color:var(--texto);box-shadow:var(--sombra)}
+.wk-note{font-size:12.5px;color:var(--texto-sec);background:var(--azul-claro);border-radius:10px;padding:8px 10px}
+.wk-note button{background:none;border:0;color:var(--azul);font-weight:800;font-family:inherit;font-size:12.5px;cursor:pointer;padding:0}
+.wk-sec{margin-top:14px}
+.wk-h{font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#234146;margin-bottom:6px}
+.wk-hint{font-size:12px;color:var(--texto-sec);margin:-3px 0 6px}
+.wk-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.wk-kpi{background:#F4F8F7;border-radius:10px;padding:8px}
+.wk-kpi label{display:block;font-size:11px;font-weight:800;color:#234146;margin:0 0 4px;text-transform:uppercase}
+.wk-modal .wk-kpi input{padding:6px 8px;font-size:16px;font-weight:800;text-align:center;background:#fff}
+.wk-row{border:1px solid var(--cinza-borda);border-radius:12px;padding:8px;margin-bottom:8px;display:grid;gap:6px}
+.wk-row-top{display:grid;grid-template-columns:1fr 70px 30px;gap:6px}
+.wk-row-top button{border:0;background:var(--cinza-bg);border-radius:8px;cursor:pointer}
+.wk-row-mid{display:grid;grid-template-columns:1fr 14px 1fr;gap:4px;align-items:center;color:var(--texto-sec)}
+.wk-modal .wk-row input{padding:8px 10px;font-size:14px}
+.wk-add{border:1.5px dashed var(--cinza-borda);background:none;border-radius:12px;width:100%;padding:9px;font-family:inherit;font-weight:700;color:var(--azul);cursor:pointer}
+.wk-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;position:sticky;bottom:-26px;background:#fff;padding:10px 0 4px}
+.wk-actions button{font-family:inherit;font-size:14px;font-weight:800;padding:13px 6px;border-radius:12px;border:1px solid var(--cinza-borda);background:#fff;cursor:pointer}
+.wk-actions button.go{background:#234146;border-color:#234146;color:#fff}
+
+/* V45 — meta */
+.mc-pipe{font-size:13px;color:var(--texto-sec);margin-top:8px}
+.mc-pipe b{color:var(--texto)}
+
+/* ================= V44 — GRUPOS E SIMULAÇÕES ================= */
+.grp-chip{display:inline-block;margin:6px 0 0 6px;font-family:inherit;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;background:#E6F4F4;color:#0E7C7B;border:0;cursor:pointer}
+.grp-head{display:flex;justify-content:space-between;align-items:flex-start;background:linear-gradient(135deg,#0E7C7B,#12A39A);color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+.grp-head .grp-kick{color:rgba(255,255,255,.8)}
+.grp-head .grp-sub{color:#E6F4F4}
+.grp-head button{background:rgba(255,255,255,.18);border:0;color:#fff;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer}
+.grp-kick{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#0E7C7B}
+.grp-name{font-size:17px;font-weight:800;margin-top:2px}
+.grp-sub{font-size:13.5px;color:var(--texto-sec);margin-top:3px}
+.grp-top{display:flex;justify-content:space-between;align-items:flex-start}
+.grp-top button{background:#E6F4F4;border:0;color:#0E7C7B;font-family:inherit;font-weight:800;font-size:13px;padding:7px 11px;border-radius:10px;cursor:pointer}
+.grp-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--cinza-borda);font-size:14px;font-weight:700;cursor:pointer}
+.grp-item:first-of-type{margin-top:8px}
+.grp-st{font-size:12px;font-weight:700;color:var(--azul);white-space:nowrap}
+.sim-tag{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;background:#FDF1E1;color:#B26A00;vertical-align:2px;white-space:nowrap}
+
 /* Cards de insight sem conteúdo ficam ocultos */
 .copiloto:empty{display:none}
 
@@ -2051,6 +2151,10 @@ const DEFAULT_SETTINGS = {
   openaiKey: '',
   proxyUrl: '',
   proxyToken: '',
+  routes: { 2:'Araçatuba', 3:'Presidente Prudente', 4:'Marília' },
+  goalMonthly: 240,
+  goalExtraGlobal: 0,
+  goalCountTraining: false,
   model: 'gpt-4o-mini',
   voice: true
 };
@@ -2063,7 +2167,7 @@ const SEED = {
       cylinders:'45 botijões P45', contractInfo:'Ativo', contractEnd:'Mar/2025', penalty:'Sim · 3 meses',
       pains:['Reajustes frequentes','Falta de previsibilidade','Logística de botijões'],
       satisfaction:6, interest:'Alto', objections:['Está muito caro','Tenho medo de mudar'],
-      potentialConsumption:'1.500 m³/mês', potentialUDA:42, stage:'Negociação',
+      potentialConsumption:'1.500 m³/mês', potentialUDA:42, stage:'Reunião com conselho',
       lastContact:'02/12', nextContact:'Hoje · 16:30', nextAction:'Ligar para confirmar envio do contrato',
       notes:'Conselho reúne dia 12.', createdAt: Date.now() - 30*86400000 },
     { id:'op2', name:'Condomínio Jardim', type:'Residencial', city:'Campinas/SP', units:80,
@@ -2072,7 +2176,7 @@ const SEED = {
       cylinders:'28 botijões P45', contractInfo:'Sem contrato formal', contractEnd:'—', penalty:'—',
       pains:['Reclamações sobre abastecimento','Preço instável'],
       satisfaction:5, interest:'Médio', objections:['Preciso consultar o conselho'],
-      potentialConsumption:'900 m³/mês', potentialUDA:28, stage:'Diagnóstico',
+      potentialConsumption:'900 m³/mês', potentialUDA:28, stage:'Visita técnica',
       lastContact:'30/11', nextContact:'Hoje · 09:00', nextAction:'Visita técnica para verificar central GLP',
       notes:'', createdAt: Date.now() - 15*86400000 },
     { id:'op3', name:'Condomínio Parque', type:'Residencial', city:'Santos/SP', units:60,
@@ -2080,7 +2184,7 @@ const SEED = {
       supplier:'Comgás', gasType:'GN', consumption:'450 m³/mês', price:3100,
       cylinders:'—', contractInfo:'Ativo', contractEnd:'Jul/2025', penalty:'Sim',
       pains:['Atendimento lento'], satisfaction:7, interest:'Baixo', objections:['Já tenho GN'],
-      potentialConsumption:'—', potentialUDA:15, stage:'Apresentação',
+      potentialConsumption:'—', potentialUDA:15, stage:'Apresentação ao síndico',
       lastContact:'28/11', nextContact:'Sem data definida', nextAction:'Retomar contato para apresentar upgrade',
       notes:'', createdAt: Date.now() - 20*86400000 },
     { id:'op4', name:'Restaurante Bella Massa', type:'Restaurante', city:'São Paulo/SP', units:1,
@@ -2375,6 +2479,7 @@ function nav(id){
     else if(id === 'resultados') renderResults();
     else if(id === 'treino'){ renderSimList(); if(typeof updateIAStatus === 'function') updateIAStatus(); }
     else if(id === 'visita-form') populateOppSelect();
+    else if(id === 'nova-op') fillGroupListV44();
     else if(id === 'lib') renderLib();
     else if(id === 'calc') calc();
     else if(id === 'config') renderConfig();
@@ -2399,12 +2504,25 @@ function updateClock(){
 /* ============================================================
    SCORE
    ============================================================ */
+/* V43 — funil do processo Necta. "Aprovação CAR" só entra quando depende de expansão de rede. */
+const STAGES_V43 = ['Prospecção','Visita técnica','Apresentação ao síndico','Reunião com conselho','Assembleia agendada','Assembleia aprovada','Aprovação CAR','Contrato fechado'];
+const STAGE_MIGRATION_V43 = { 'Diagnóstico':'Visita técnica', 'Apresentação':'Apresentação ao síndico', 'Avaliação':'Reunião com conselho', 'Proposta':'Apresentação ao síndico', 'Negociação':'Reunião com conselho', 'Fechamento':'Assembleia aprovada' };
+const LOST_REASONS_V43 = ['Reprovada em assembleia','Oposição organizada','Síndico sem retorno','Sem viabilidade técnica','Contrato atual / multa','Preço','Outro'];
+function stagesForOpp(o){ return STAGES_V43.filter(st => st !== 'Aprovação CAR' || (o && o.needsCar)); }
+function isClosedOpp(o){ return !!o && (o.stage === 'Contrato fechado' || o.stage === 'Perdida'); }
+function migrateStagesV43(){
+  let changed = false;
+  (store.opportunities || []).forEach(o => {
+    if(STAGE_MIGRATION_V43[o.stage]){ o.stage = STAGE_MIGRATION_V43[o.stage]; changed = true; }
+  });
+  if(changed) saveStore();
+}
 function stageWeight(stage){
-  const w = { Prospecção:3, Diagnóstico:6, Apresentação:8, Avaliação:9, 'Visita técnica':10, Proposta:12, Negociação:14, Fechamento:15, 'Contrato fechado':15 };
+  const w = { 'Prospecção':3, 'Visita técnica':6, 'Apresentação ao síndico':8, 'Reunião com conselho':10, 'Assembleia agendada':12, 'Assembleia aprovada':14, 'Aprovação CAR':14, 'Contrato fechado':15 };
   return w[stage] || 0;
 }
 function momentumOf(o){
-  if(!o || o.stage === 'Contrato fechado') return { score:100, level:'fechado', reasons:[], action:'Celebrar fechamento' };
+  if(!o || isClosedOpp(o)) return { score: o && o.stage === 'Perdida' ? 0 : 100, level:'fechado', reasons:[], action: o && o.stage === 'Perdida' ? 'Oportunidade perdida' : 'Celebrar fechamento' };
   let score = 45;
   const reasons = [];
   const actionParts = [];
@@ -2433,7 +2551,7 @@ function momentumOf(o){
 
 function commercialBrainItems(){
   return store.opportunities
-    .filter(o => o.stage !== 'Contrato fechado')
+    .filter(o => !isClosedOpp(o))
     .map(o => {
       const s = scoreOf(o);
       const m = momentumOf(o);
@@ -2454,7 +2572,7 @@ function renderCommercialBrain(){
   const el = document.getElementById('commercialBrain');
   if(!el) return;
   const items = commercialBrainItems();
-  const active = store.opportunities.filter(o => o.stage !== 'Contrato fechado');
+  const active = store.opportunities.filter(o => !isClosedOpp(o));
   const missingNext = active.filter(o => !o.nextAction).length;
   const stale = active.filter(o => {
     const t = String(o.nextContact || '').toLowerCase();
@@ -2505,7 +2623,7 @@ function scoreOf(o){
    PLANEJADOR DO DIA — organiza a execução comercial
    ============================================================ */
 function getDayPlan(){
-  const open = store.opportunities.filter(o => o.stage !== 'Contrato fechado');
+  const open = store.opportunities.filter(o => !isClosedOpp(o));
   const today = todayKey();
   const done = actionsDone[today] || [];
   const pending = open.filter(o => o.nextContact && !done.includes(o.id));
@@ -2595,8 +2713,8 @@ function saveDayClosing(){
    ============================================================ */
 function renderHome(){
   try {
-    const hot = store.opportunities.filter(o => scoreOf(o).level === 'alta' && o.stage !== 'Contrato fechado');
-    const overdue = store.opportunities.filter(o => /Hoje/i.test(o.nextContact || '') && o.stage !== 'Contrato fechado');
+    const hot = store.opportunities.filter(o => scoreOf(o).level === 'alta' && !isClosedOpp(o));
+    const overdue = store.opportunities.filter(o => /Hoje/i.test(o.nextContact || '') && !isClosedOpp(o));
     const cpMsg = overdue.length
       ? `Você tem <b>${overdue.length} follow-up${overdue.length > 1 ? 's' : ''}</b> vencendo hoje. Priorize o <b>${escapeHtml(overdue[0].name)}</b>.`
       : hot.length
@@ -2609,10 +2727,10 @@ function renderHome(){
     renderDayPlanner();
     renderAdaptiveTraining();
 
-    const udasTreino = store.stats.points ? Math.round(store.stats.points / 4.7) : 0;
-    const udasFechadas = udasClosedThisMonth();
-    const udas = udasFechadas + udasTreino;
-    const META = 240;
+    const g = goalStatsV45();
+    const udasFechadas = g.fechadas;
+    const udas = g.realizado;
+    const META = g.meta;
     const mesEl = document.getElementById('metaMesLabel');
     if(mesEl){
       const now = new Date();
@@ -2623,11 +2741,13 @@ function renderHome(){
     }
     const pct = Math.min(100, Math.round(udas / META * 100));
     document.getElementById('metaPct').textContent = pct + '%';
-    document.getElementById('metaNum').innerHTML = udas + '<span> / ' + META + ' UDAs</span>';
+    document.getElementById('metaNum').innerHTML = fmtN(udas) + '<span> / ' + fmtN(META) + ' UDAs</span>';
+    const pipeEl = document.getElementById('metaPipeV45');
+    if(pipeEl) pipeEl.innerHTML = `Pipeline ativo <b>${fmtN(g.ativo)}</b> · Global <b>${fmtN(g.global)}</b> UDA`;
     document.getElementById('metaBar').style.width = pct + '%';
 
     const pipelineAtivo = store.opportunities
-      .filter(o => o.stage !== 'Contrato fechado')
+      .filter(o => !isClosedOpp(o))
       .reduce((s,o) => s + (o.potentialUDA || 0), 0);
 
     document.getElementById('metaStats').innerHTML = `
@@ -2638,7 +2758,7 @@ function renderHome(){
     const today = todayKey();
     const doneIds = actionsDone[today] || [];
     const allAgenda = store.opportunities
-      .filter(o => o.nextContact && o.nextContact !== 'Sem data definida' && o.nextContact !== '—' && o.stage !== 'Contrato fechado');
+      .filter(o => o.nextContact && o.nextContact !== 'Sem data definida' && o.nextContact !== '—' && !isClosedOpp(o));
     const pendingAgenda = allAgenda.filter(o => !doneIds.includes(o.id)).slice(0, 4);
     const doneCount = allAgenda.filter(o => doneIds.includes(o.id)).length;
     const totalCount = allAgenda.length;
@@ -2667,7 +2787,7 @@ function renderHome(){
           : `<div class="empty" style="padding:20px 0;">Sem ações agendadas</div>`);
 
     const sorted = store.opportunities
-      .filter(o => o.stage !== 'Contrato fechado')
+      .filter(o => !isClosedOpp(o))
       .map(o => ({ o, s: scoreOf(o) }))
       .sort((a,b) => b.s.score - a.s.score)
       .slice(0, 3);
@@ -2691,6 +2811,343 @@ function renderHome(){
 /* ============================================================
    V42 — AÇÕES RÁPIDAS + CARD "AGORA"
    ============================================================ */
+/* V45 — meta configurável: realizado no mês × pipeline ativo × global */
+function goalStatsV45(){
+  const st = store.settings || {};
+  const meta = Math.max(1, Number(st.goalMonthly) || 240);
+  const fechadas = udasClosedThisMonth();
+  const treino = st.goalCountTraining && store.stats.points ? Math.round(store.stats.points / 4.7) : 0;
+  const realizado = fechadas + treino;
+  const open = store.opportunities.filter(o => !isClosedOpp(o));
+  // Ativo = negociação em andamento (já passou da prospecção). Global = todas em aberto + leads fora do app.
+  const ativo = open.filter(o => o.stage !== 'Prospecção').reduce((t,o) => t + (o.potentialUDA || 0), 0);
+  const extra = Math.max(0, Number(st.goalExtraGlobal) || 0);
+  const global = open.reduce((t,o) => t + (o.potentialUDA || 0), 0) + extra;
+  return { meta, fechadas, treino, realizado, pct: Math.min(100, Math.round(realizado / meta * 100)), ativo, global, extra };
+}
+const fmtN = n => Number(n || 0).toLocaleString('pt-BR');
+
+/* ============================================================
+   V46 — FECHAMENTO SEMANAL (modelo Necta 360°)
+   Preenche sozinho a partir do app; tudo é editável antes de gerar.
+   ============================================================ */
+let weeklyOffsetV46 = 0;
+const WEEKLY_KEY_V46 = 'treinoGas_weekly_v1';
+function loadWeeklyV46(){ try { return JSON.parse(localStorage.getItem(WEEKLY_KEY_V46) || '{}'); } catch(e){ return {}; } }
+function saveWeeklyV46(all){ try { localStorage.setItem(WEEKLY_KEY_V46, JSON.stringify(all)); } catch(e){} }
+function ymdV46(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function weekRangeV46(offset){
+  const now = new Date();
+  const mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7) + 7 * offset);
+  const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 4);
+  const end = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 7);
+  const nextEnd = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 14);
+  const dd = d => String(d.getDate()).padStart(2,'0'), mm = d => String(d.getMonth()+1).padStart(2,'0');
+  const label = mon.getMonth() === fri.getMonth()
+    ? `${dd(mon)}–${dd(fri)} / ${mm(fri)} / ${fri.getFullYear()}`
+    : `${dd(mon)}/${mm(mon)} – ${dd(fri)}/${mm(fri)} / ${fri.getFullYear()}`;
+  const file = `${dd(mon)}_A_${dd(fri)}_${mm(fri)}_${fri.getFullYear()}`;
+  return { start: mon.getTime(), end: end.getTime(), nextEnd: nextEnd.getTime(), mon, fri, key: ymdV46(mon), label, file,
+           startYmd: ymdV46(mon), endYmd: ymdV46(new Date(end.getTime() - 1)), nextEndYmd: ymdV46(new Date(nextEnd.getTime() - 1)) };
+}
+
+function computeWeeklyV46(offset){
+  const w = weekRangeV46(offset);
+  const inW = t => t >= w.start && t < w.end;
+  const inWYmd = d => d && d >= w.startYmd && d <= w.endYmd;
+  const opps = store.opportunities;
+  const byId = id => opps.find(o => o.id === id);
+  const uda = o => o && o.potentialUDA ? o.potentialUDA : 0;
+
+  // Meta × realizado (mês da semana)
+  const ym = w.fri.getFullYear() + '-' + String(w.fri.getMonth()+1).padStart(2,'0');
+  const meta = Math.max(1, Number(store.settings.goalMonthly) || 240);
+  const realizado = closings.filter(c => c.udas && c.date && c.date.startsWith(ym) && c.date <= w.endYmd).reduce((t,c) => t + c.udas, 0);
+  const visitsW = (store.visits || []).filter(v => inW(v.timestamp || 0));
+  const schedDoneW = (typeof visitSchedules !== 'undefined' ? visitSchedules : []).filter(v => v.status === 'done' && inW(v.completedAt || 0)
+    && !visitsW.some(x => x.oppId === v.oppId && Math.abs((x.timestamp || 0) - v.completedAt) < 86400000));
+  const reunioes = visitsW.length + schedDoneW.length;
+  const assembleiasList = opps.filter(o => inWYmd(o.assemblyDate));
+  const novasList = opps.filter(o => inW(o.createdAt || 0));
+
+  // Mudanças no pipeline (timeline da semana)
+  const rows = [];
+  opps.forEach(o => {
+    const ev = (timeline[o.id] || []).filter(e => inW(e.at || 0));
+    let antes = null, agora = null;
+    ev.forEach(e => {
+      let m;
+      if(e.type === 'stage' && (m = /Etapa:\s*(.+?)\s*→\s*(.+)$/.exec(e.text || ''))){ if(antes === null) antes = m[1]; agora = m[2]; }
+      else if(e.type === 'stage' && /^Perdida/.test(e.text || '')){ if(antes === null) antes = o.lostFromStage || '—'; agora = 'Perdida' + (o.lostReason ? ' (' + o.lostReason + ')' : ''); }
+      else if(e.type === 'stage' && (m = /^Reaberta na etapa (.+)$/.exec(e.text || ''))){ if(antes === null) antes = 'Perdida'; agora = 'Reaberta · ' + m[1]; }
+      else if(e.type === 'closing'){ if(antes === null) antes = o.stage; agora = 'Contrato fechado'; }
+      else if(e.type === 'created'){ if(antes === null) antes = 'Nova'; if(agora === null) agora = o.stage; }
+    });
+    if(agora !== null && agora !== antes) rows.push({ nome:o.name, uda:uda(o), antes:antes || '—', agora, prox: isClosedOpp(o) ? (o.stage === 'Perdida' ? 'Registrar aprendizado' : 'Acompanhar implantação') : (o.nextAction || 'Definir próximo passo'), weight: stageWeight(agora) - stageWeight(antes), id:o.id });
+  });
+  rows.sort((a,b) => b.uda - a.uda);
+
+  // Principais resultados
+  const resultados = [];
+  closings.filter(c => c.udas && inWYmd(c.date)).forEach(c => resultados.push(`${c.oppName} — contrato fechado (${fmtN(c.udas)} UDA).`));
+  rows.filter(r => r.weight > 0 && r.antes !== 'Nova' && !/Contrato fechado/.test(r.agora)).forEach(r => resultados.push(`${r.nome} avançou para ${r.agora}${r.uda ? ' (' + fmtN(r.uda) + ' UDA)' : ''}.`));
+  if(novasList.length){
+    const top = novasList.slice().sort((a,b) => uda(b) - uda(a))[0];
+    resultados.push(`${novasList.length} nova${novasList.length > 1 ? 's' : ''} oportunidade${novasList.length > 1 ? 's' : ''} cadastrada${novasList.length > 1 ? 's' : ''}${uda(top) ? ` (destaque: ${top.name}, ${fmtN(uda(top))} UDA)` : ''}.`);
+  }
+
+  // Riscos
+  const riscos = [];
+  opps.filter(o => o.stage === 'Perdida' && inW(o.lostAt || 0)).forEach(o => riscos.push(`${o.name} perdido${o.lostReason ? ' — ' + o.lostReason.toLowerCase() : ''}${uda(o) ? ' (' + fmtN(uda(o)) + ' UDA)' : ''}.`));
+  const car = opps.filter(o => o.stage === 'Aprovação CAR');
+  if(car.length) riscos.push(`Aprovação CAR pendente: ${car.map(o => o.name).join(', ')} — ${fmtN(car.reduce((t,o) => t + uda(o), 0))} UDA.`);
+  opps.filter(o => !isClosedOpp(o) && o.assemblyDate && o.assemblyDate > w.endYmd && o.assemblyDate <= w.nextEndYmd)
+    .forEach(o => riscos.push(`Assembleia de ${o.name} em ${formatScheduleDate(o.assemblyDate).slice(0,5)} — garantir edital e quórum.`));
+  const semPasso = opps.filter(o => !isClosedOpp(o) && !o.nextAction);
+  if(semPasso.length) riscos.push(`${semPasso.length} oportunidade${semPasso.length > 1 ? 's' : ''} sem próximo passo definido.`);
+
+  // Relacionamento, aprendizado, radar
+  const touched = opps.filter(o => (timeline[o.id] || []).some(e => inW(e.at || 0)) || visitsW.some(v => v.oppId === o.id));
+  const sindicos = touched.filter(o => o.decisor).slice(0, 4).map(o => `${o.decisor} (${o.name})`);
+  const admins = [...new Set(touched.map(o => o.admin).filter(a => a && a !== '—'))].slice(0, 4);
+  const relacionamento = [sindicos.length ? 'Síndicos: ' + sindicos.join(', ') : '', admins.length ? 'Administradoras: ' + admins.join(', ') : ''].filter(Boolean).join('\n');
+  const dayCl = closings.filter(c => !c.udas && inWYmd(c.date));
+  const aprendizado = [
+    ...opps.filter(o => o.stage === 'Perdida' && inW(o.lostAt || 0) && o.lostNote).map(o => `${o.name}: ${o.lostNote}`),
+    ...dayCl.map(c => c.lesson).filter(Boolean)
+  ].slice(0, 4).join('\n');
+  const radar = [
+    ...opps.filter(o => !isClosedOpp(o) && o.assemblyDate && o.assemblyDate > w.endYmd && o.assemblyDate <= w.nextEndYmd).map(o => `Assembleia ${o.name} — ${formatScheduleDate(o.assemblyDate).slice(0,5)}`),
+    ...(typeof visitSchedules !== 'undefined' ? visitSchedules : []).filter(v => v.status !== 'done' && v.date > w.endYmd && v.date <= w.nextEndYmd).map(v => `${v.clientName || 'Visita'} — ${v.purpose || 'visita'} ${formatScheduleDate(v.date).slice(0,5)}`),
+    ...dayCl.map(c => c.tomorrow).filter(Boolean).slice(-1)
+  ].slice(0, 4).join('\n');
+
+  const routes = Object.values(store.settings.routes || {});
+  const cities = [...new Set((touched.length ? touched.map(o => cityLabelV43(o.city)) : routes).filter(Boolean))];
+  return {
+    week: w.label, file: w.file,
+    cidades: cities.map(c => c.toUpperCase()).join(' + '),
+    meta, realizado, gap: Math.max(0, meta - realizado),
+    reunioes, assembleias: assembleiasList.length, novas: novasList.length,
+    resultados: resultados.slice(0, 4).join('\n'),
+    riscos: riscos.slice(0, 4).join('\n'),
+    rows: rows.slice(0, 3).map(({nome,uda,antes,agora,prox}) => ({nome, uda, antes, agora, prox})),
+    relacionamento, aprendizado, radar
+  };
+}
+
+function openWeeklyV46(offset){
+  if(typeof offset === 'number') weeklyOffsetV46 = offset;
+  const w = weekRangeV46(weeklyOffsetV46);
+  const saved = loadWeeklyV46()[w.key];
+  const d = saved || computeWeeklyV46(weeklyOffsetV46);
+  document.getElementById('weeklyV46')?.remove();
+  const m = document.createElement('div');
+  m.id = 'weeklyV46'; m.className = 'v43-overlay';
+  const kpi = (id, label, val) => `<div class="wk-kpi"><label>${label}</label><input type="number" inputmode="numeric" data-k="${id}" value="${escapeHtml(val)}"></div>`;
+  const ta = (id, label, hint, rows) => `<div class="wk-sec"><div class="wk-h">${label}</div>${hint ? `<div class="wk-hint">${hint}</div>` : ''}<textarea data-k="${id}" rows="${rows || 4}">${escapeHtml(d[id] || '')}</textarea></div>`;
+  const rowHtml = (r, i) => `<div class="wk-row" data-i="${i}">
+      <div class="wk-row-top"><input data-r="nome" placeholder="Oportunidade" value="${escapeHtml(r.nome || '')}"><input data-r="uda" type="number" placeholder="UDA" value="${escapeHtml(r.uda || '')}"><button onclick="this.closest('.wk-row').remove();saveWeeklyDraftV46()" aria-label="Remover">✕</button></div>
+      <div class="wk-row-mid"><input data-r="antes" placeholder="Antes" value="${escapeHtml(r.antes || '')}"><span>→</span><input data-r="agora" placeholder="Agora" value="${escapeHtml(r.agora || '')}"></div>
+      <input data-r="prox" placeholder="Próxima ação" value="${escapeHtml(r.prox || '')}">
+    </div>`;
+  m.innerHTML = `<div class="v43-modal wk-modal">
+    <div class="wk-top">
+      <div><div class="v43-kick">📊 Necta 360° · Fechamento semanal</div><div class="v43-title">Semana ${escapeHtml(d.week || w.label)}</div></div>
+      <button class="wk-close" onclick="document.getElementById('weeklyV46').remove()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="wk-seg"><button class="${weeklyOffsetV46 === 0 ? 'on' : ''}" onclick="openWeeklyV46(0)">Esta semana</button><button class="${weeklyOffsetV46 === -1 ? 'on' : ''}" onclick="openWeeklyV46(-1)">Semana passada</button></div>
+    ${saved ? `<div class="wk-note">Rascunho salvo. <button onclick="recalcWeeklyV46()">↻ Recalcular com os dados do app</button></div>` : `<div class="wk-note">Preenchido com os dados do app. Revise e complete antes de gerar.</div>`}
+    <div class="wk-sec"><div class="wk-h">Cidade(s)</div><input data-k="cidades" value="${escapeHtml(d.cidades || '')}" placeholder="PRES. PRUDENTE + MARÍLIA + ARAÇATUBA"></div>
+    <div class="wk-sec"><div class="wk-h">Meta × Realizado</div>
+      <div class="wk-kpis">${kpi('meta','Meta UDA',d.meta)}${kpi('realizado','UDA realizada',d.realizado)}${kpi('gap','Gap',d.gap)}${kpi('reunioes','Reuniões',d.reunioes)}${kpi('assembleias','Assembleias',d.assembleias)}${kpi('novas','Novas oport.',d.novas)}</div></div>
+    ${ta('resultados','🏆 Principais resultados','Uma linha por item · até 4')}
+    ${ta('riscos','🔴 O que não aconteceu / riscos','Uma linha por item · até 4')}
+    <div class="wk-sec"><div class="wk-h">🟡 Mudanças no pipeline</div><div class="wk-hint">Até 3 linhas no slide</div>
+      <div id="wkRowsV46">${(d.rows || []).map(rowHtml).join('')}</div>
+      <button class="wk-add" onclick="addWeeklyRowV46()">+ Adicionar linha</button></div>
+    ${ta('relacionamento','🤝 Relacionamento','Síndicos, administradoras, parceiros', 3)}
+    ${ta('aprendizado','🧠 Aprendizado','', 3)}
+    ${ta('radar','🎯 Radar para próxima semana','', 3)}
+    <div class="wk-actions">
+      <button class="go" onclick="downloadWeeklyPptxV46()">⬇️ Baixar PowerPoint</button>
+      <button onclick="copyWeeklyTextV46()">📋 Copiar texto</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('input', (ev) => { if(ev.target && ['meta','realizado'].includes(ev.target.dataset.k)){ const g = m.querySelector('[data-k="gap"]'); g.value = Math.max(0, (+m.querySelector('[data-k="meta"]').value || 0) - (+m.querySelector('[data-k="realizado"]').value || 0)); } saveWeeklyDraftV46(); });
+  m.dataset.week = d.week || w.label; m.dataset.file = d.file || w.file;
+}
+function addWeeklyRowV46(){
+  const box = document.getElementById('wkRowsV46');
+  if(!box) return;
+  if(box.children.length >= 3){ showToast('O slide comporta 3 linhas'); return; }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = `<div class="wk-row"><div class="wk-row-top"><input data-r="nome" placeholder="Oportunidade"><input data-r="uda" type="number" placeholder="UDA"><button onclick="this.closest('.wk-row').remove();saveWeeklyDraftV46()" aria-label="Remover">✕</button></div><div class="wk-row-mid"><input data-r="antes" placeholder="Antes"><span>→</span><input data-r="agora" placeholder="Agora"></div><input data-r="prox" placeholder="Próxima ação"></div>`;
+  box.appendChild(tmp.firstElementChild);
+}
+function readWeeklyV46(){
+  const m = document.getElementById('weeklyV46');
+  if(!m) return null;
+  const d = { week: m.dataset.week, file: m.dataset.file };
+  m.querySelectorAll('[data-k]').forEach(el => { d[el.dataset.k] = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value; });
+  d.rows = [...m.querySelectorAll('.wk-row')].map(r => { const o = {}; r.querySelectorAll('[data-r]').forEach(i => o[i.dataset.r] = i.value.trim()); return o; }).filter(r => r.nome);
+  return d;
+}
+function saveWeeklyDraftV46(){
+  const d = readWeeklyV46(); if(!d) return;
+  const all = loadWeeklyV46(); all[weekRangeV46(weeklyOffsetV46).key] = d; saveWeeklyV46(all);
+}
+function recalcWeeklyV46(){
+  if(!confirm('Recalcular com os dados do app? As edições desta semana serão substituídas.')) return;
+  const all = loadWeeklyV46(); delete all[weekRangeV46(weeklyOffsetV46).key]; saveWeeklyV46(all);
+  openWeeklyV46();
+}
+const linesV46 = t => String(t || '').split('\n').map(x => x.replace(/^\s*(\d+[.)]|[-•*])\s*/, '').trim()).filter(Boolean);
+
+function weeklyTextV46(d){
+  const list = (t) => linesV46(t).slice(0, 4).map((x,i) => `${i+1}. ${x}`).join('\n') || '—';
+  return [
+    `*NECTA 360° | FECHAMENTO SEMANAL*`,
+    `Semana: ${d.week}${d.cidades ? '\nCidade(s): ' + d.cidades : ''}`,
+    ``,
+    `*META × REALIZADO*`,
+    `Meta: ${fmtN(d.meta)} UDA · Realizado: ${fmtN(d.realizado)} · Gap: ${fmtN(d.gap)}`,
+    `Reuniões: ${d.reunioes || 0} · Assembleias: ${d.assembleias || 0} · Novas oport.: ${d.novas || 0}`,
+    ``, `🏆 *PRINCIPAIS RESULTADOS*`, list(d.resultados),
+    ``, `🔴 *O QUE NÃO ACONTECEU / RISCOS*`, list(d.riscos),
+    ``, `🟡 *MUDANÇAS NO PIPELINE*`,
+    (d.rows || []).map(r => `• ${r.nome}${r.uda ? ' (' + r.uda + ' UDA)' : ''}: ${r.antes || '—'} → ${r.agora || '—'} · Próx.: ${r.prox || '—'}`).join('\n') || '—',
+    ``, `🤝 *RELACIONAMENTO*`, d.relacionamento || '—',
+    ``, `🧠 *APRENDIZADO*`, d.aprendizado || '—',
+    ``, `🎯 *RADAR PARA PRÓXIMA SEMANA*`, d.radar || '—'
+  ].join('\n');
+}
+async function copyWeeklyTextV46(){
+  const d = readWeeklyV46(); if(!d) return;
+  saveWeeklyDraftV46();
+  const text = weeklyTextV46(d);
+  try { await navigator.clipboard.writeText(text); showToast('Texto copiado ✓'); return; } catch(e){}
+  // Sem permissão de área de transferência: mostra o texto selecionado para copiar manualmente.
+  const box = document.createElement('div'); box.className = 'v43-overlay'; box.style.zIndex = 600;
+  box.innerHTML = `<div class="v43-modal"><div class="v43-kick">Copiar texto</div><div class="v43-sub">Toque e segure no texto → Copiar.</div><textarea rows="14" readonly>${escapeHtml(text)}</textarea><div class="v43-btns"><button onclick="this.closest('.v43-overlay').remove()">Fechar</button></div></div>`;
+  document.body.appendChild(box); const t = box.querySelector('textarea'); t.focus(); t.select();
+}
+
+function ensurePptxGenV46(){
+  if(window.PptxGenJS) return Promise.resolve(true);
+  return new Promise(resolve => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';
+    s.onload = () => resolve(!!window.PptxGenJS); s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+}
+// Recria o slide do modelo "NECTA 360° | FECHAMENTO SEMANAL" (13,33" × 7,5", mesmas posições e cores).
+async function downloadWeeklyPptxV46(){
+  const d = readWeeklyV46(); if(!d) return;
+  saveWeeklyDraftV46();
+  showToast('Gerando PowerPoint...');
+  if(!(await ensurePptxGenV46())){ showToast('Sem internet para gerar o PowerPoint. Use "Copiar texto".'); return; }
+  const C = { dark:'234146', text:'303E42', green:'7BC12B', teal:'4C7D7F', yellow:'EBBF3D', light:'F4F8F7', line:'C8D6D5', white:'FFFFFF' };
+  const F = 'Aptos';
+  const pres = new PptxGenJS();
+  pres.layout = 'LAYOUT_WIDE';
+  const s = pres.addSlide();
+  s.background = { color: C.white };
+  const T = (text, o) => s.addText(text, Object.assign({ fontFace:F, color:C.text, fontSize:7.2, valign:'middle', margin:[2,4,2,4], isTextBox:true, fit:'shrink' }, o));
+  const R = (o, rounded) => s.addShape(rounded ? pres.shapes.ROUNDED_RECTANGLE : pres.shapes.RECTANGLE, Object.assign(rounded ? { rectRadius:0.06 } : {}, o));
+
+  // Cabeçalho
+  R({ x:0, y:0, w:13.333, h:0.72, fill:{ color:C.dark }, line:{ color:C.dark } });
+  T('NECTA 360°  |  FECHAMENTO SEMANAL', { x:0.42, y:0.1, w:6, h:0.5, fontSize:18, bold:true, color:C.white });
+  // No modelo original este texto era escuro sobre a faixa escura (quase invisível); aqui vai em tom claro.
+  T(`SEMANA: ${d.week}`, { x:8.0, y:0.11, w:4.85, h:0.24, fontSize:8.5, bold:true, color:'E3EEEC', align:'right' });
+  T(`CIDADE(S): ${d.cidades || '—'}`, { x:8.0, y:0.37, w:4.85, h:0.22, fontSize:7.5, color:'C8D6D5', align:'right' });
+
+  // Meta × realizado
+  T('META × REALIZADO', { x:0.42, y:0.83, w:12.45, h:0.22, fontSize:10.5, bold:true, color:C.dark });
+  const kpis = [['META UDA', d.meta, C.green], ['UDA REALIZADA', d.realizado, C.teal], ['GAP', d.gap, C.yellow], ['REUNIÕES', d.reunioes, C.green], ['ASSEMBLEIAS', d.assembleias, C.teal], ['NOVAS OPORT.', d.novas, C.yellow]];
+  kpis.forEach(([lbl, val, col], i) => {
+    const x = 0.42 + i * 2.05;
+    R({ x, y:1.1, w:1.92, h:0.63, fill:{ color:C.light }, line:{ color:C.line } }, true);
+    R({ x, y:1.1, w:1.92, h:0.07, fill:{ color:col }, line:{ color:col } }, true);
+    T(lbl, { x:x + 0.08, y:1.2, w:1.76, h:0.16, fontSize:7, bold:true, color:C.dark, align:'center' });
+    T(fmtN(val || 0), { x:x + 0.08, y:1.39, w:1.76, h:0.26, fontSize:12, bold:true, align:'center' });
+  });
+
+  // Resultados e riscos
+  const block = (title, items, x, w, fill) => {
+    T(title, { x, y:1.93, w, h:0.23, fontSize:10.5, bold:true, color:C.dark });
+    R({ x, y:2.22, w, h:1.43, fill:{ color:fill }, line:{ color:C.line } }, true);
+    items.slice(0, 4).forEach((it, i) => T(`${i+1}. ${it}`, { x:x + 0.18, y:2.3 + i * 0.31, w:w - 0.4, h:0.29 }));
+  };
+  block('🏆 PRINCIPAIS RESULTADOS', linesV46(d.resultados), 0.42, 6.05, C.light);
+  block('🔴 O QUE NÃO ACONTECEU / RISCOS', linesV46(d.riscos), 6.72, 6.19, C.white);
+
+  // Mudanças no pipeline
+  T('🟡 MUDANÇAS NO PIPELINE', { x:0.42, y:3.82, w:12.49, h:0.23, fontSize:10.5, bold:true, color:C.dark });
+  const cols = [['OPORTUNIDADE',0.42,2.55,'nome'], ['UDA',2.97,0.75,'uda'], ['ANTES',3.72,2.2,'antes'], ['AGORA',5.92,2.35,'agora'], ['PRÓXIMA AÇÃO',8.27,4.64,'prox']];
+  cols.forEach(([h, x, w]) => { R({ x, y:4.1, w, h:0.32, fill:{ color:C.green }, line:{ color:C.green } }); T(h, { x, y:4.1, w, h:0.32, fontSize:6.2, bold:true, color:C.white, align:'center' }); });
+  (d.rows || []).slice(0, 3).forEach((r, i) => {
+    const y = 4.42 + i * 0.34;
+    cols.forEach(([, x, w, k]) => {
+      R({ x, y, w, h:0.34, fill:{ color:C.white }, line:{ color:C.line } });
+      T(String(r[k] || ''), { x, y, w, h:0.34, fontSize:6, align:'center' });
+    });
+  });
+
+  // Relacionamento / aprendizado / radar
+  [['🤝 RELACIONAMENTO', d.relacionamento, 0.42, 3.95], ['🧠 APRENDIZADO', d.aprendizado, 4.57, 3.95], ['🎯 RADAR PARA PRÓXIMA SEMANA', d.radar, 8.72, 4.19]].forEach(([h, txt, x, w]) => {
+    T(h, { x, y:5.56, w, h:0.22, fontSize:10.5, bold:true, color:C.dark });
+    R({ x, y:5.84, w, h:0.83, fill:{ color:C.light }, line:{ color:C.line } }, true);
+    T(String(txt || '').trim(), { x:x + 0.18, y:5.9, w:w - 0.37, h:0.72, fontSize:6.8 });
+  });
+
+  // Rodapé
+  R({ x:0, y:7.2, w:13.333, h:0.3, fill:{ color:C.dark }, line:{ color:C.dark } });
+  T('Necta 360°  •  Planejar → Executar → Registrar → Aprender → Replanejar', { x:0.42, y:7.22, w:12.45, h:0.24, fontSize:7, bold:true, color:C.white, align:'center' });
+
+  try {
+    await pres.writeFile({ fileName: `NECTA_360_FECHAMENTO_SEMANAL_${d.file}.pptx` });
+    showToast('PowerPoint baixado ✓');
+  } catch(e){ console.error(e); showToast('Não foi possível gerar o arquivo'); }
+}
+
+/* V44 — grupos de condomínios (mesmo síndico / administradora / conjunto) */
+function groupKeyV44(g){ return String(g || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
+function groupMembersV44(g){
+  const k = groupKeyV44(g);
+  return k ? store.opportunities.filter(o => groupKeyV44(o.group) === k) : [];
+}
+function allGroupsV44(){
+  const seen = new Map();
+  store.opportunities.forEach(o => { const k = groupKeyV44(o.group); if(k && !seen.has(k)) seen.set(k, o.group.trim()); });
+  return [...seen.values()].sort();
+}
+function groupSummaryV44(g){
+  const m = groupMembersV44(g);
+  const active = m.filter(o => !isClosedOpp(o));
+  return { members:m, count:m.length, uda: active.reduce((t,o) => t + (o.potentialUDA || 0), 0),
+           won: m.filter(o => o.stage === 'Contrato fechado').length, lost: m.filter(o => o.stage === 'Perdida').length };
+}
+function fillGroupListV44(){
+  const dl = document.getElementById('groupListV44');
+  if(dl) dl.innerHTML = allGroupsV44().map(g => `<option value="${escapeHtml(g)}"></option>`).join('');
+}
+function filterGroupV44(g){
+  opsFilter = 'group:' + g;
+  document.querySelectorAll('#opsFilters .chip').forEach(c => c.classList.remove('active'));
+  nav('ops');
+}
+function normCityV43(c){
+  return String(c || '').split('/')[0].split(' - ')[0].normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+}
+function cityLabelV43(c){ return String(c || '').split('/')[0].split(' - ')[0].trim(); }
+function routeCityTodayV43(){
+  const r = (store.settings && store.settings.routes) || {};
+  return r[new Date().getDay()] || '';
+}
 function callOpp(oppId){
   const o = store.opportunities.find(x => x.id === oppId);
   const phone = String(o && o.contact || '').replace(/\D/g, '');
@@ -2728,7 +3185,7 @@ function renderHomeNowV42(){
 
   const today = todayKey();
   const doneIds = actionsDone[today] || [];
-  const open = store.opportunities.filter(o => o.stage !== 'Contrato fechado');
+  const open = store.opportunities.filter(o => !isClosedOpp(o));
   const rows = [];
   const visitsToday = (typeof visitSchedules !== 'undefined' ? visitSchedules : [])
     .filter(v => v.status !== 'done' && v.date === today);
@@ -2737,6 +3194,13 @@ function renderHomeNowV42(){
   const brainOrder = commercialBrainItems().map(x => x.o.id);
   open.filter(o => !doneIds.includes(o.id) && !withVisit.has(o.id) && (o.nextAction || o.nextContact))
     .forEach(o => { const w = oppWhenV42(o); rows.push({ kind:'opp', o, w, rank:w.rank, time:w.time || '99:99' }); });
+  const routeCity = routeCityTodayV43();
+  const rc = normCityV43(routeCity);
+  rows.forEach(r => {
+    const opp = r.o || store.opportunities.find(x => x.id === (r.v && r.v.oppId));
+    r.inRoute = !!rc && !!opp && normCityV43(opp.city) === rc;
+    if(r.inRoute && r.rank >= 2) r.rank = 1.5;
+  });
   rows.sort((a,b) => a.rank - b.rank || a.time.localeCompare(b.time) ||
     (brainOrder.indexOf(a.o && a.o.id) >>> 0) - (brainOrder.indexOf(b.o && b.o.id) >>> 0));
   const todayCount = rows.filter(r => r.kind === 'visit' || (r.w && r.w.today)).length;
@@ -2768,7 +3232,7 @@ function renderHomeNowV42(){
     return `<div class="now-row">
       <div class="now-when ${w.cls}">${w.label}</div>
       <div class="now-main">
-        <div class="now-name" onclick="openOpp('${o.id}')">${escapeHtml(o.name)}</div>
+        <div class="now-name" onclick="openOpp('${o.id}')">${escapeHtml(o.name)}${r.inRoute ? ' <span class="in-route">na rota</span>' : ''}</div>
         <div class="now-desc">${escapeHtml(o.nextAction || 'Definir próximo passo')}</div>
         <div class="qa-row">${btns}</div>
       </div>
@@ -2781,12 +3245,13 @@ function renderHomeNowV42(){
     noDate ? `<span class="now-tag">${noDate} sem data</span>` : ''
   ].join('');
   box.innerHTML = `
+    ${routeCity ? `<div class="route-chip">📍 Rota de hoje: <b>${escapeHtml(routeCity)}</b></div>` : ''}
     <div class="now-head"><div class="now-kick">Agora</div><div class="now-badge">${todayCount ? todayCount + (todayCount > 1 ? ' ações hoje' : ' ação hoje') : rows.length + ' pendente' + (rows.length === 1 ? '' : 's')}</div></div>
     ${shown.length ? shown.map(rowHtml).join('') : (open.length
       ? `<div class="now-empty"><b>🎉 Tudo em dia!</b>Nenhuma ação pendente agora.</div>`
       : `<div class="now-empty"><b>Comece por aqui</b>Cadastre sua primeira oportunidade.</div>`)}
     <div class="now-foot" onclick="nav('ops')"><span class="t">Ver todas (${open.length})</span><span class="now-tags">${tags}</span></div>
-    <button class="now-close" onclick="openDayClosing()">🌙 Fechar o dia</button>`;
+    <div class="now-links"><button class="now-close" onclick="openDayClosing()">🌙 Fechar o dia</button><button class="now-close" onclick="openWeeklyV46(0)">📊 Fechamento semanal</button></div>`;
 }
 
 /* ============================================================
@@ -2890,21 +3355,42 @@ document.addEventListener('click', e => {
    ============================================================ */
 function renderOps(){
   try {
-    const pipeline = store.opportunities.filter(o => o.stage !== 'Contrato fechado').reduce((s,o) => s + (o.potentialUDA || 0), 0);
-    document.getElementById('opsSub').textContent = `${store.opportunities.length} cadastradas · ${pipeline} UDA em pipeline`;
+    const pipeline = store.opportunities.filter(o => !isClosedOpp(o)).reduce((s,o) => s + (o.potentialUDA || 0), 0);
+    const gOps = goalStatsV45();
+    document.getElementById('opsSub').textContent = `${store.opportunities.length} cadastradas · ${fmtN(gOps.ativo)} UDA ativo · ${fmtN(gOps.global)} global`;
+    const cityBox = document.getElementById('opsCityChips');
+    if(cityBox){
+      const cities = [...new Set(store.opportunities.filter(o => !isClosedOpp(o) && o.city).map(o => cityLabelV43(o.city)))].filter(Boolean).sort();
+      cityBox.innerHTML = cities.map(c => `<button class="chip ${opsFilter === 'city:' + c ? 'active' : ''}" data-f="city:${escapeHtml(c)}">📍 ${escapeHtml(c)}</button>`).join('')
+        + allGroupsV44().map(g => `<button class="chip ${opsFilter === 'group:' + g ? 'active' : ''}" data-f="group:${escapeHtml(g)}">👥 ${escapeHtml(g)}</button>`).join('');
+    }
     let list = store.opportunities.map(o => ({ o, s: scoreOf(o) }));
-    if(['alta','media','baixa'].includes(opsFilter)) list = list.filter(x => x.s.level === opsFilter);
-    else if(opsFilter !== 'all') list = list.filter(x => x.o.stage === opsFilter);
+    if(opsFilter === 'Perdida') list = list.filter(x => x.o.stage === 'Perdida');
+    else if(opsFilter.startsWith('group:')) list = list.filter(x => groupKeyV44(x.o.group) === groupKeyV44(opsFilter.slice(6)));
+    else {
+      list = list.filter(x => x.o.stage !== 'Perdida');
+      if(['alta','media','baixa'].includes(opsFilter)) list = list.filter(x => x.s.level === opsFilter);
+      else if(opsFilter.startsWith('city:')) list = list.filter(x => cityLabelV43(x.o.city) === opsFilter.slice(5));
+      else if(opsFilter.startsWith('group:')) list = list.filter(x => groupKeyV44(x.o.group) === groupKeyV44(opsFilter.slice(6)));
+      else if(opsFilter !== 'all') list = list.filter(x => x.o.stage === opsFilter);
+    }
     list.sort((a,b) => b.s.score - a.s.score);
     const box = document.getElementById('opsList');
     if(!list.length){
       box.innerHTML = `<div class="empty"><div class="ic">🎯</div>Nenhuma oportunidade nesta categoria.</div>`;
       return;
     }
-    box.innerHTML = list.map(({ o, s }) => {
+    let groupHead = '';
+    if(opsFilter.startsWith('group:')){
+      const g = opsFilter.slice(6), gs = groupSummaryV44(g);
+      groupHead = `<div class="grp-head"><div><div class="grp-kick">👥 Grupo</div><div class="grp-name">${escapeHtml(g)}</div>
+        <div class="grp-sub">${gs.count} condomínio${gs.count === 1 ? '' : 's'} · <b>${gs.uda} UDA</b> em aberto${gs.won ? ' · ' + gs.won + ' fechado' + (gs.won > 1 ? 's' : '') : ''}${gs.lost ? ' · ' + gs.lost + ' perdido' + (gs.lost > 1 ? 's' : '') : ''}</div></div>
+        <button onclick="opsFilter='all';renderOps();document.querySelectorAll('#opsFilters .chip').forEach(c=>c.classList.toggle('active',c.dataset.f==='all'))">✕</button></div>`;
+    }
+    box.innerHTML = groupHead + list.map(({ o, s }) => {
       const icon = s.level === 'alta' ? '🔥' : s.level === 'media' ? '🟡' : '🔵';
       const label = s.level === 'alta' ? 'Alta' : s.level === 'media' ? 'Média' : 'Baixa';
-      const cls = o.stage === 'Contrato fechado' ? 'ganha' : s.level;
+      const cls = o.stage === 'Contrato fechado' ? 'ganha' : o.stage === 'Perdida' ? 'perdida' : s.level;
       return `<div class="opp-card ${cls}" onclick="openOpp('${o.id}')">
         <div class="opp-card-head">
           <div><h4>${escapeHtml(o.name)}</h4>
@@ -2915,8 +3401,10 @@ function renderOps(){
           <div>${o.gasType} atual ${o.price ? '· <b>R$ ' + o.price.toLocaleString('pt-BR') + '/mês</b>' : ''}${pricePerKgOf(o.price, o.consumption) ? ' · R$ ' + formatBRMoney(pricePerKgOf(o.price, o.consumption)) + '/kg' : ''}</div>
           <div>UDA <b>${o.potentialUDA || '—'}</b></div>
         </div>
-        <div class="stage-pill">${o.stage}</div>
-        ${o.stage === 'Contrato fechado' ? '' : (() => {
+        <div class="stage-pill">${o.stage}${o.stage === 'Perdida' && o.lostReason ? ' · ' + escapeHtml(o.lostReason) : ''}</div>
+        ${o.group ? `<button class="grp-chip" data-group="${escapeHtml(o.group)}" onclick="event.stopPropagation();filterGroupV44(this.dataset.group)">👥 ${escapeHtml(o.group)}</button>` : ''}
+        ${o.assemblyDate && !isClosedOpp(o) ? `<div class="asm-chip">🗳️ Assembleia ${formatScheduleDate(o.assemblyDate).slice(0,5)}</div>` : ''}
+        ${isClosedOpp(o) ? '' : (() => {
           const w = oppWhenV42(o);
           const when = w.rank === 4 ? 'Sem data' : w.today ? 'Hoje' + (w.time && w.time !== '99:99' ? ' ' + w.time : '') : w.label.replace(/<[^>]+>/g,' ');
           return `<div class="opp-next ${o.nextAction ? '' : 'none'}">→ <b>${o.nextAction ? when + ':' : 'Sem próximo passo'}</b> ${escapeHtml(o.nextAction || '')}</div>
@@ -3082,7 +3570,7 @@ function openOpp(id){
         ${s.insuficiente ? '' : `<div class="score-ring" style="background:conic-gradient(${s.level === 'alta' ? 'var(--verde)' : s.level === 'media' ? 'var(--amarelo)' : '#4A9EFF'} 0 ${s.score}%, rgba(255,255,255,.15) 0)"><div>${s.score}</div></div>`}
       </div>`;
 
-    const stages = ['Prospecção','Diagnóstico','Apresentação','Avaliação','Visita técnica','Proposta','Negociação','Fechamento','Contrato fechado'];
+    const stages = stagesForOpp(o);
     const stageIdx = stages.indexOf(o.stage);
     const cur = stageIdx < 0 ? 0 : stageIdx;
     const dots = stages.map((st,i) => {
@@ -3091,13 +3579,24 @@ function openOpp(id){
       return `${line}<button class="st-dot ${cls}" title="${st}" aria-label="${st}" onclick="setStage('${o.id}','${st}')">${i < cur ? '✓' : i + 1}</button>`;
     }).join('');
     const prev = stages[cur - 1], nextSt = stages[cur + 1];
-    const stagesHtml = `<div class="stepper-card">
+    const asmInfo = o.assemblyDate ? `<div class="asm-line">🗳️ Assembleia: <b>${formatScheduleDate(o.assemblyDate)}${o.assemblyTime ? ' às ' + escapeHtml(o.assemblyTime) : ''}</b> <button onclick="openAssemblyModalV43('${o.id}')">alterar</button></div>` : '';
+    const stagesHtml = o.stage === 'Perdida' ? `<div class="stepper-card lost">
+        <div class="stepper-top"><b>❌ Perdida</b><span>${o.lostAt ? new Date(o.lostAt).toLocaleDateString('pt-BR') : ''}</span></div>
+        <div class="stepper-next" style="margin-top:6px">Motivo: <b>${escapeHtml(o.lostReason || '—')}</b>${o.lostFromStage ? ' · estava em ' + escapeHtml(o.lostFromStage) : ''}</div>
+        ${o.lostNote ? `<div class="stepper-next" style="margin-top:4px">Aprendizado: ${escapeHtml(o.lostNote)}</div>` : ''}
+        <div class="stepper-btns"><button onclick="reopenOppV43('${o.id}')">Reabrir oportunidade</button></div>
+      </div>` : `<div class="stepper-card">
         <div class="stepper-top"><b>${escapeHtml(o.stage || stages[0])}</b><span>Etapa ${cur + 1} de ${stages.length}</span></div>
         <div class="stepper">${dots}</div>
         <div class="stepper-next">${nextSt ? `Próxima: <b>${nextSt}</b>` : '✓ Última etapa concluída'}</div>
         <div class="stepper-btns">
           <button ${prev ? `onclick="setStage('${o.id}','${prev}')"` : 'disabled'}>Voltar etapa</button>
           <button class="go" ${nextSt ? `onclick="setStage('${o.id}','${nextSt}')"` : 'disabled'}>${nextSt ? `Avançar para ${nextSt} →` : 'Concluído'}</button>
+        </div>
+        ${asmInfo}
+        <div class="stepper-foot">
+          <label class="car-check"><input type="checkbox" ${o.needsCar ? 'checked' : ''} onchange="toggleCarV43('${o.id}', this.checked)"> Depende de expansão de rede (CAR)</label>
+          ${o.stage !== 'Contrato fechado' ? `<button class="lost-btn" onclick="openLostModalV43('${o.id}')">Marcar perdida</button>` : ''}
         </div>
       </div>`;
 
@@ -3109,9 +3608,20 @@ function openOpp(id){
     document.getElementById('oppDetailContent').innerHTML = `
       ${stagesHtml}
 
-      ${o.nextAction
+      ${o.stage === 'Perdida' ? '' : o.nextAction
         ? `<div class="next-action"><div class="lbl">✦ Próxima ação</div><div class="txt">${escapeHtml(o.nextAction)}</div></div>`
         : `<div class="next-action" style="background:linear-gradient(135deg,#E5484D,#FF6B6E);"><div class="lbl">⚠️ Sem próximo passo</div><div class="txt">Defina uma ação concreta antes de sair desta oportunidade.</div></div>`}
+
+      ${o.group ? (() => {
+        const gs = groupSummaryV44(o.group);
+        const others = gs.members.filter(x => x.id !== o.id);
+        return `<div class="card grp-card">
+          <div class="grp-top"><div><div class="grp-kick">👥 Grupo</div><div class="grp-name">${escapeHtml(o.group)}</div></div>
+            <button data-group="${escapeHtml(o.group)}" onclick="filterGroupV44(this.dataset.group)">Ver grupo ›</button></div>
+          <div class="grp-sub">${gs.count} condomínio${gs.count === 1 ? '' : 's'} · <b>${gs.uda} UDA</b> em aberto</div>
+          ${others.map(x => `<div class="grp-item" onclick="openOpp('${x.id}')"><span>${escapeHtml(x.name)}</span><span class="grp-st">${escapeHtml(x.stage)}</span></div>`).join('')}
+        </div>`;
+      })() : ''}
 
       <div class="detail-quick">
         <button onclick="callOpp('${o.id}')"><i>📞</i>Ligar</button>
@@ -3190,6 +3700,13 @@ function copilotoAdvice(o, s){
   const hasNext = !!o.nextAction;
   let headline = '';
   if(s.insuficiente) headline = `Ainda faltam dados essenciais. Antes de avançar, colete as informações abaixo para entender o real potencial.`;
+  else if(stage === 'Visita técnica') headline = `Confirme a viabilidade técnica e use a visita para mapear síndico, conselho e o calendário de assembleias.`;
+  else if(stage === 'Apresentação ao síndico') headline = `O síndico precisa virar seu aliado. Leve prova social de condomínios parecidos e combine como levar o tema ao conselho.`;
+  else if(stage === 'Reunião com conselho') headline = `O conselho decide se o tema vai para assembleia. Antecipe objeções e saia com a data da assembleia definida.`;
+  else if(stage === 'Assembleia agendada') headline = `Garanta o edital com o Gás Natural na pauta, entenda o quórum e mobilize os moradores a favor antes do dia.`;
+  else if(stage === 'Assembleia aprovada') headline = `Aprovado! Formalize rápido: ata, documentação e cronograma de obra antes que o tema esfrie.`;
+  else if(stage === 'Aprovação CAR') headline = `Depende da expansão de rede. Acompanhe o CAR e mantenha o síndico informado para não perder o engajamento.`;
+  else if(stage === 'Perdida') headline = `Oportunidade perdida${o.lostReason ? ' — ' + escapeHtml(o.lostReason) : ''}. Registre o aprendizado e avalie se vale reabrir no futuro.`;
   else if(stage === 'Prospecção') headline = `Você está no início. Foque em qualificar: dor, decisor e consumo. Sem isso, a proposta não avança.`;
   else if(stage === 'Diagnóstico') headline = `Você identificou a situação. Agora aprofunde o impacto da dor no orçamento do cliente antes de apresentar solução.`;
   else if(stage === 'Apresentação' || stage === 'Avaliação') headline = `Bom momento para validar se o decisor realmente enxerga valor. Envolva quem assina a decisão.`;
@@ -3209,6 +3726,13 @@ function copilotoAdvice(o, s){
     'Fechamento': `"Vamos alinhar documentação e data de assinatura. Se preferir, acompanho o síndico na reunião."`,
     'Contrato fechado': `"Vou acompanhar a implantação e ficar à disposição para qualquer necessidade."`
   };
+  Object.assign(argByStage, {
+    'Apresentação ao síndico': `"Condomínios aqui da região já migraram e hoje têm fornecimento contínuo, sem caminhão e sem botijão. Posso mostrar os números?"`,
+    'Reunião com conselho': `"Trago o estudo completo para o conselho avaliar: economia estimada, segurança e o cronograma da obra."`,
+    'Assembleia agendada': `"Para garantir o quórum, que tal comunicarmos os moradores antes? Posso preparar um material simples."`,
+    'Assembleia aprovada': `"Vamos formalizar: com a ata em mãos, já consigo encaminhar a documentação e o cronograma."`,
+    'Aprovação CAR': `"A expansão da rede está em aprovação. Assim que sair, eu aviso o senhor em primeira mão."`
+  });
   const argument = argByStage[o.stage] || `"Me ajuda a entender o que precisa para avançar?"`;
 
   const qByStage = {
@@ -3222,14 +3746,21 @@ function copilotoAdvice(o, s){
     'Fechamento': `Quem assina pelo condomínio e qual o melhor dia para formalizarmos?`,
     'Contrato fechado': `Como está sendo a experiência até agora?`
   };
+  Object.assign(qByStage, {
+    'Apresentação ao síndico': `Como o senhor prefere levar o tema ao conselho: com eu presente ou com um material para apresentar?`,
+    'Reunião com conselho': `Qual é a próxima data possível de assembleia e qual quórum ela exige?`,
+    'Assembleia agendada': `O edital já saiu com o Gás Natural na pauta? Quem pode ajudar a mobilizar os moradores?`,
+    'Assembleia aprovada': `Quem assina pelo condomínio e quando conseguimos a ata registrada?`,
+    'Aprovação CAR': `Posso manter o senhor atualizado sobre a expansão da rede por WhatsApp?`
+  });
   const question = qByStage[o.stage] || `Qual é o próximo passo concreto para esta oportunidade avançar?`;
 
   let risk = '';
-  if(o.penalty && /sim/i.test(o.penalty) && o.stage !== 'Contrato fechado') risk = `Contrato atual com multa rescisória. O conselho pode adiar decisão por medo de custo imediato.`;
-  else if(!hasDecisor && o.stage !== 'Contrato fechado') risk = `Você ainda não tem acesso confirmado ao decisor. Sem ele, a proposta não avança.`;
-  else if(!hasPain && o.stage !== 'Contrato fechado') risk = `Dor não identificada com clareza. A conversa pode virar só comparação de preço.`;
-  else if(!hasNext && o.stage !== 'Contrato fechado') risk = `Sem próximo passo registrado — a oportunidade tende a esfriar.`;
-  else if((o.objections || []).some(x => /medo|desconf/i.test(x)) && o.stage !== 'Contrato fechado') risk = `Cliente demonstrou receio de mudança. Reforce garantias, suporte e cases similares.`;
+  if(o.penalty && /sim/i.test(o.penalty) && !isClosedOpp(o)) risk = `Contrato atual com multa rescisória. O conselho pode adiar decisão por medo de custo imediato.`;
+  else if(!hasDecisor && !isClosedOpp(o)) risk = `Você ainda não tem acesso confirmado ao decisor. Sem ele, a proposta não avança.`;
+  else if(!hasPain && !isClosedOpp(o)) risk = `Dor não identificada com clareza. A conversa pode virar só comparação de preço.`;
+  else if(!hasNext && !isClosedOpp(o)) risk = `Sem próximo passo registrado — a oportunidade tende a esfriar.`;
+  else if((o.objections || []).some(x => /medo|desconf/i.test(x)) && !isClosedOpp(o)) risk = `Cliente demonstrou receio de mudança. Reforce garantias, suporte e cases similares.`;
   return { headline, argument, question, risk };
 }
 
@@ -3239,10 +3770,99 @@ function setStage(id, stage){
   if(stage === 'Contrato fechado'){ openClosingModal(id); return; }
   const oldStage = o.stage;
   o.stage = stage;
+  if(stage === 'Aprovação CAR') o.needsCar = true;
   saveStore();
   addTimelineEvent(id, 'stage', `Etapa: ${oldStage} → ${stage}`);
   showToast('Etapa atualizada: ' + stage);
   openOpp(id);
+  maybeAskAssemblyV43(id);
+}
+
+/* ============================================================
+   V43 — ASSEMBLEIA → EDITAL AUTOMÁTICO · PERDIDA
+   ============================================================ */
+function maybeAskAssemblyV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  if(o && o.stage === 'Assembleia agendada' && !o.assemblyDate) openAssemblyModalV43(id);
+}
+function openAssemblyModalV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  if(!o) return;
+  document.getElementById('assemblyModalV43')?.remove();
+  const m = document.createElement('div');
+  m.id = 'assemblyModalV43'; m.className = 'v43-overlay';
+  m.innerHTML = `<div class="v43-modal">
+    <div class="v43-kick">🗳️ Assembleia</div>
+    <div class="v43-title">${escapeHtml(o.name)}</div>
+    <div class="v43-sub">Qual a data confirmada da assembleia? Vou criar a tarefa de solicitar o edital de convocação.</div>
+    <label>Data</label><input type="date" id="asmDateV43" value="${escapeHtml(o.assemblyDate || '')}">
+    <label>Horário (opcional)</label><input type="time" id="asmTimeV43" value="${escapeHtml(o.assemblyTime || '')}">
+    <div class="v43-btns"><button onclick="document.getElementById('assemblyModalV43').remove()">Depois</button><button class="go" onclick="saveAssemblyV43('${o.id}')">Confirmar data</button></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+function saveAssemblyV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  const date = document.getElementById('asmDateV43')?.value;
+  if(!o) return;
+  if(!date){ showToast('Informe a data da assembleia'); return; }
+  const first = !o.assemblyDate || o.assemblyDate !== date;
+  o.assemblyDate = date;
+  o.assemblyTime = document.getElementById('asmTimeV43')?.value || '';
+  const br = formatScheduleDate(date).slice(0, 5);
+  if(first){
+    o.nextAction = `Solicitar edital de convocação (assembleia ${br})`;
+    o.nextContact = 'Hoje';
+    addTimelineEvent(id, 'nextAction', `Assembleia em ${formatScheduleDate(date)} · tarefa criada: solicitar edital de convocação`);
+  }
+  saveStore();
+  document.getElementById('assemblyModalV43')?.remove();
+  showToast(first ? '✓ Tarefa criada: solicitar edital' : 'Data da assembleia salva');
+  openOpp(id);
+}
+function openLostModalV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  if(!o) return;
+  document.getElementById('lostModalV43')?.remove();
+  const m = document.createElement('div');
+  m.id = 'lostModalV43'; m.className = 'v43-overlay';
+  m.innerHTML = `<div class="v43-modal">
+    <div class="v43-kick" style="color:var(--vermelho)">Marcar como perdida</div>
+    <div class="v43-title">${escapeHtml(o.name)}</div>
+    <label>Motivo</label><select id="lostReasonV43">${LOST_REASONS_V43.map(r => `<option>${r}</option>`).join('')}</select>
+    <label>O que aprendemos? (opcional)</label><textarea id="lostNoteV43" rows="3" placeholder="Ex.: oposição se organizou antes da assembleia; mobilizar moradores mais cedo"></textarea>
+    <div class="v43-btns"><button onclick="document.getElementById('lostModalV43').remove()">Cancelar</button><button class="go danger" onclick="saveLostV43('${o.id}')">Marcar perdida</button></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+function saveLostV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  if(!o) return;
+  o.lostFromStage = o.stage;
+  o.lostReason = document.getElementById('lostReasonV43').value;
+  o.lostNote = document.getElementById('lostNoteV43').value.trim();
+  o.lostAt = Date.now();
+  o.stage = 'Perdida';
+  saveStore();
+  addTimelineEvent(id, 'stage', `Perdida (${o.lostReason})${o.lostNote ? ' · ' + o.lostNote : ''}`);
+  document.getElementById('lostModalV43')?.remove();
+  showToast('Oportunidade marcada como perdida');
+  openOpp(id);
+}
+function reopenOppV43(id){
+  const o = store.opportunities.find(x => x.id === id);
+  if(!o) return;
+  o.stage = o.lostFromStage && o.lostFromStage !== 'Perdida' ? o.lostFromStage : 'Prospecção';
+  saveStore();
+  addTimelineEvent(id, 'stage', `Reaberta na etapa ${o.stage}`);
+  showToast('Oportunidade reaberta');
+  openOpp(id);
+}
+function toggleCarV43(id, on){
+  const o = store.opportunities.find(x => x.id === id);
+  if(!o) return;
+  if(!on && o.stage === 'Aprovação CAR'){ showToast('Mude a etapa antes de desmarcar o CAR'); openOpp(id); return; }
+  o.needsCar = on; saveStore(); openOpp(id);
 }
 
 function promptNextAction(id){
@@ -3274,11 +3894,16 @@ function editOpp(id){
   if(!o){ showToast('Oportunidade não encontrada'); return; }
   editingOppId = id;
   document.getElementById('f-name').value = o.name || '';
+  document.getElementById('f-group').value = o.group || '';
+  fillGroupListV44();
   document.getElementById('f-type').value = o.type || 'Residencial';
   document.getElementById('f-city').value = o.city || '';
   document.getElementById('f-uf').value = o.uf || '';
   document.getElementById('f-units').value = o.units || '';
-  document.getElementById('f-gasType').value = o.gasType || 'GLP';
+  const gasSel = document.getElementById('f-gasType');
+  gasSel.value = o.gasType || 'GLP';
+  // Valor antigo que não está na lista (ex.: "GLP", "GN"): adiciona para não se perder ao salvar.
+  if(o.gasType && gasSel.value !== o.gasType){ gasSel.add(new Option(o.gasType, o.gasType)); gasSel.value = o.gasType; }
   document.getElementById('f-decisor').value = o.decisor || '';
   document.getElementById('f-admin').value = (o.admin && o.admin !== '—') ? o.admin : '';
   document.getElementById('f-contact').value = o.contact || '';
@@ -3294,6 +3919,7 @@ function editOpp(id){
   document.getElementById('f-pains').value = (o.pains && o.pains.length) ? o.pains.join(', ') : '';
   document.getElementById('f-nextAction').value = o.nextAction || '';
   document.getElementById('f-stage').value = o.stage || 'Prospecção';
+  document.getElementById('f-needsCar').checked = !!o.needsCar;
 
   const header = document.querySelector('#screen-nova-op .sub-header h2');
   const sub = document.querySelector('#screen-nova-op .sub-header .sub');
@@ -3314,6 +3940,7 @@ function saveNovaOp(){
     type: document.getElementById('f-type').value,
     city: document.getElementById('f-city').value.trim(),
     uf: document.getElementById('f-uf').value.trim().toUpperCase(),
+    group: (() => { const g = document.getElementById('f-group').value.trim(); return allGroupsV44().find(x => groupKeyV44(x) === groupKeyV44(g)) || g; })(),
     units: parseInt(document.getElementById('f-units').value) || 0,
     decisor: document.getElementById('f-decisor').value.trim(),
     admin: document.getElementById('f-admin').value.trim() || '—',
@@ -3330,6 +3957,7 @@ function saveNovaOp(){
     pains: document.getElementById('f-pains').value.trim().split(/[,;\n]/).map(s => s.trim()).filter(Boolean),
     nextAction: document.getElementById('f-nextAction').value.trim(),
     stage: document.getElementById('f-stage').value,
+    needsCar: document.getElementById('f-needsCar').checked || document.getElementById('f-stage').value === 'Aprovação CAR',
     potentialUDA: 0, nextContact: 'Hoje', lastContact: '—', createdAt: Date.now()
   };
 
@@ -3339,11 +3967,11 @@ function saveNovaOp(){
       const old = store.opportunities[idx];
       store.opportunities[idx] = {
         ...old,
-        name: o.name, type: o.type, city: o.city, units: o.units,
+        name: o.name, type: o.type, city: o.city, units: o.units, group: o.group,
         decisor: o.decisor, admin: o.admin, contact: o.contact, email: o.email,
         cnpj: o.cnpj, address: o.address, supplier: o.supplier, gasType: o.gasType,
         price: o.price, consumption: o.consumption, contractEnd: o.contractEnd,
-        penalty: o.penalty, pains: o.pains, nextAction: o.nextAction, stage: o.stage
+        penalty: o.penalty, pains: o.pains, nextAction: o.nextAction, stage: o.stage, needsCar: o.needsCar
       };
     }
     saveStore();
@@ -3357,10 +3985,11 @@ function saveNovaOp(){
     if(header) header.textContent = 'Nova oportunidade';
     if(sub) sub.textContent = 'Preencha o essencial. Dá pra completar depois.';
     if(btn){ btn.textContent = 'SALVAR OPORTUNIDADE'; btn.classList.remove('verde'); }
-    ['f-name','f-city','f-uf','f-units','f-decisor','f-admin','f-contact','f-email','f-cnpj','f-address','f-supplier','f-price','f-consumption','f-price-kg','f-contractEnd','f-penalty','f-pains','f-nextAction'].forEach(fid => document.getElementById(fid).value = '');
+    ['f-name','f-city','f-uf','f-units','f-decisor','f-admin','f-contact','f-email','f-cnpj','f-address','f-supplier','f-price','f-consumption','f-price-kg','f-contractEnd','f-penalty','f-pains','f-nextAction','f-group'].forEach(fid => document.getElementById(fid).value = '');
     const cnpjStatusEl = document.getElementById('cnpjStatus');
     if(cnpjStatusEl) cnpjStatusEl.style.display = 'none';
-    setTimeout(() => openOpp(savedId), 300);
+    document.getElementById('f-needsCar').checked = false;
+    setTimeout(() => { openOpp(savedId); maybeAskAssemblyV43(savedId); }, 300);
     return;
   }
 
@@ -3368,10 +3997,11 @@ function saveNovaOp(){
   saveStore();
   addTimelineEvent(o.id, 'created', `Oportunidade criada na etapa ${o.stage}`);
   showToast('Oportunidade criada ✓');
-  ['f-name','f-city','f-uf','f-units','f-decisor','f-admin','f-contact','f-email','f-cnpj','f-address','f-supplier','f-price','f-consumption','f-price-kg','f-contractEnd','f-penalty','f-pains','f-nextAction'].forEach(fid => document.getElementById(fid).value = '');
+  ['f-name','f-city','f-uf','f-units','f-decisor','f-admin','f-contact','f-email','f-cnpj','f-address','f-supplier','f-price','f-consumption','f-price-kg','f-contractEnd','f-penalty','f-pains','f-nextAction','f-group'].forEach(fid => document.getElementById(fid).value = '');
   const cnpjStatusEl2 = document.getElementById('cnpjStatus');
   if(cnpjStatusEl2) cnpjStatusEl2.style.display = 'none';
-  setTimeout(() => openOpp(o.id), 300);
+  document.getElementById('f-needsCar').checked = false;
+  setTimeout(() => { openOpp(o.id); maybeAskAssemblyV43(o.id); }, 300);
 }
 
 /* ============================================================
@@ -3381,7 +4011,7 @@ function renderVisits(){
   try {
     const box = document.getElementById('visitsContent');
     const visits = store.visits.slice().sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-    const ops = store.opportunities.filter(o => o.stage !== 'Contrato fechado');
+    const ops = store.opportunities.filter(o => !isClosedOpp(o));
 
     let html = '';
 
@@ -3594,7 +4224,7 @@ function homeScheduleVisitV27(){
 
 function openVisitOpportunityPickerV29(){
   document.getElementById('visitOpportunityPickerV29')?.remove();
-  const opportunities=(store.opportunities||[]).filter(o=>o.stage!=='Contrato fechado');
+  const opportunities=(store.opportunities||[]).filter(o=>!isClosedOpp(o));
   const overlay=document.createElement('div');
   overlay.id='visitOpportunityPickerV29';
   overlay.style.cssText='position:fixed;inset:0;background:rgba(20,25,18,.30);z-index:10002;display:flex;align-items:center;justify-content:center;padding:16px;';
@@ -3718,7 +4348,7 @@ function onVisitaOppChange(){
 function populateOppSelect(){
   const sel = document.getElementById('v-opp');
   if(!sel) return;
-  sel.innerHTML = store.opportunities.filter(o => o.stage !== 'Contrato fechado').map(o => `<option value="${o.id}">${escapeHtml(o.name)}</option>`).join('')
+  sel.innerHTML = store.opportunities.filter(o => !isClosedOpp(o)).map(o => `<option value="${o.id}">${escapeHtml(o.name)}</option>`).join('')
     || '<option value="">— Cadastre uma oportunidade primeiro —</option>';
   if(currentVisitaOppId) sel.value = currentVisitaOppId;
   sel.onchange = onVisitaOppChange;
@@ -3897,7 +4527,7 @@ function openVisitScheduler(scheduleId){
           ${[30,45,60,90,120].map(n=>`<option value="${n}" ${Number(v?.duration||60)===n?'selected':''}>${n<60?n+' min':n===60?'1 hora':(n/60)+' horas'}</option>`).join('')}
         </select></div>
         <div><label>Objetivo</label><select id="vs22Purpose">
-          ${['Prospecção','Diagnóstico','Apresentação','Reunião com síndico','Retorno comercial','Negociação','Pós-venda'].map(x=>`<option ${v?.purpose===x?'selected':''}>${x}</option>`).join('')}
+          ${['Prospecção','Visita técnica','Apresentação ao síndico','Reunião com conselho','Assembleia','Retorno comercial','Pós-venda'].map(x=>`<option ${v?.purpose===x?'selected':''}>${x}</option>`).join('')}
         </select></div>
         <div class="v23-full"><label>Participantes</label><input id="vs22Participants" value="${escapeHtml(v?.participants||'')}" placeholder="Síndico, conselho, administradora..."></div>
         <div class="v23-full"><label>Observações</label><textarea id="vs22Notes" placeholder="O que preciso tratar nesta visita?">${escapeHtml(v?.notes||'')}</textarea></div>
@@ -4126,7 +4756,7 @@ function renderCompactScheduling(){renderUpcomingVisitsV22();if(typeof renderHom
    TREINO ADAPTATIVO — aprende com a rotina comercial
    ============================================================ */
 function getAdaptiveTraining(){
-  const open = store.opportunities.filter(o => o.stage !== 'Contrato fechado');
+  const open = store.opportunities.filter(o => !isClosedOpp(o));
   const objectionMap = {};
   open.forEach(o => (o.objections || []).forEach(x => {
     const raw = String(x).trim();
@@ -4400,7 +5030,26 @@ const SIMS = [
     opening:'Quero entender de verdade a diferença entre GN e GLP. Não quero decidir sem saber.' },
   { id:'advogado', ic:'⚖️', t:'Síndico advogado', d:'"Quero analisar o contrato primeiro."',
     persona:'um síndico advogado, extremamente detalhista, que vai analisar cada cláusula do contrato.',
-    opening:'Sou advogado e preciso analisar o contrato inteiro antes de qualquer coisa.' }
+    opening:'Sou advogado e preciso analisar o contrato inteiro antes de qualquer coisa.' },
+  // Casos reais do pipeline Necta (anonimizados)
+  { id:'oposicao', ic:'🗳️', t:'Oposição organizada na assembleia', d:'"Isso é obra desnecessária."', tag:'Caso real',
+    persona:'um morador que lidera um grupo de oposição na assembleia do condomínio. Acha que a troca para gás natural canalizado é obra desnecessária, teme bagunça, quebra-quebra e custos escondidos, e já convenceu vizinhos a votar contra. É articulado, fala alto e usa boatos ("ouvi dizer que em outro prédio deu problema").',
+    opening:'Com todo respeito, isso aqui é obra desnecessária. Vai quebrar o prédio inteiro e no fim quem paga somos nós. Eu e mais uns vizinhos vamos votar contra.' },
+  { id:'conselho-ausente', ic:'🪑', t:'Conselho que não aparece', d:'"A assembleia foi cancelada por falta de conselheiros."', tag:'Caso real',
+    persona:'um síndico cansado cuja assembleia sobre gás natural foi cancelada porque os conselheiros não compareceram. Ele tem interesse, mas não quer remarcar sem o conselho alinhado e está desanimado.',
+    opening:'Pois é, cancelaram a assembleia porque nenhum conselheiro apareceu. Sinceramente, não sei se vale a pena remarcar agora.' },
+  { id:'votacao-online', ic:'📱', t:'Votação online sem quórum', d:'"Aprovou presencial, mas o online não anda."', tag:'Caso real',
+    persona:'um síndico cujo condomínio aprovou o gás natural na reunião presencial, mas a votação online complementar está parada por baixo engajamento dos moradores. Ele está frustrado e sem tempo para cobrar morador por morador.',
+    opening:'O pessoal aprovou na reunião, mas a votação online não sai do lugar. Ninguém entra para votar e eu não tenho tempo de ficar cobrando.' },
+  { id:'sindico-sumido', ic:'👻', t:'Síndico que sumiu', d:'"Faz meses que ele não responde."', tag:'Caso real',
+    persona:'um síndico que administra vários prédios e parou de responder o consultor há mais de seis meses. Está sobrecarregado, atende com pressa e com pouca paciência, e só retoma o assunto se perceber um benefício claro e rápido para ele.',
+    opening:'Alô? Ah, é do gás... olha, estou no meio de uma correria aqui, fala rápido.' },
+  { id:'reconquista-p45', ic:'🔄', t:'Fornecedor de P45 saiu da região', d:'"Estamos improvisando com o gás."', tag:'Oportunidade',
+    persona:'um síndico de condomínio com contrato antigo de GLP em cilindros P45 cujo fornecedor deixou de atender a região. Está improvisando com entregas avulsas, preocupado com falta de gás, mas desconfiado de assumir compromisso longo às pressas.',
+    opening:'Nosso fornecedor de P45 parou de atender aqui. A gente está se virando com entrega avulsa, mas eu não quero assinar nada correndo.' },
+  { id:'prova-social', ic:'🏢', t:'Síndico que pede referência', d:'"Algum prédio aqui da cidade já fez?"', tag:'Caso real',
+    persona:'um síndico cético que só avança se souber de condomínios vizinhos, da mesma cidade, que já migraram para gás natural e estão satisfeitos. Pede nomes, quer ligar para outro síndico e compara tudo com a realidade local.',
+    opening:'Antes de qualquer coisa: algum prédio aqui da cidade já fez essa troca? Quero falar com o síndico de lá.' }
 ];
 
 function renderSimList(){
@@ -4409,7 +5058,7 @@ function renderSimList(){
   box.innerHTML = SIMS.map(s => `
     <div class="sim-card" onclick="openSim('${s.id}')">
       <div class="sim-ic">${s.ic}</div>
-      <div class="sim-body"><div class="t">${s.t}</div><div class="d">${s.d}</div></div>
+      <div class="sim-body"><div class="t">${s.t}${s.tag ? ` <span class="sim-tag">${s.tag}</span>` : ''}</div><div class="d">${s.d}</div></div>
       <div class="sim-arrow">›</div>
     </div>`).join('');
 }
@@ -4450,7 +5099,7 @@ async function sendMsg(){
 
   let reply = null;
   if(hasAI()){
-    const sys = `Você é ${currentSim.persona}. Responda como esse personagem em uma conversa real de vendas por telefone.
+    const sys = `Você é ${currentSim.persona}. Responda como esse personagem em uma conversa real com um consultor comercial de gás natural canalizado (interior de São Paulo), que tenta levar o condomínio a aprovar a ligação ao gás natural.
 Regras:
 - Português brasileiro, tom natural de fala.
 - Respostas CURTAS: no máximo 2 frases.
@@ -4512,6 +5161,37 @@ function fallbackClientReply(text, sim){
     advogado: [
       [/reajuste|cláusula|rescisão/, 'Existe cláusula de saída sem multa por descumprimento?'],
       [/.*/, 'Vou querer o contrato por escrito antes de qualquer coisa.']
+    ],
+    oposicao: [
+      [/obra|quebra|reforma|transtorno/, 'E quem garante que não vai ficar tudo quebrado? Eu já vi prédio que ficou meses em obra.'],
+      [/custo|pagar|gratuit|investimento|sem custo/, 'Isso é o que vocês dizem agora. Coloca por escrito que o condomínio não paga nada.'],
+      [/segur|norma|técnic/, 'Segurança é o que me preocupa. Gás passando pela parede do meu apartamento?'],
+      [/.*/, 'Vocês vendedores falam bonito. A maioria aqui não quer isso, pode ter certeza.']
+    ],
+    'conselho-ausente': [
+      [/conselh|reunião|conversar/, 'Até topo marcar com o conselho antes, mas eles são difíceis de reunir.'],
+      [/data|remarcar|agenda/, 'Remarcar sem o conselho alinhado vai dar no mesmo. Eles precisam estar convencidos antes.'],
+      [/.*/, 'Eu gosto da ideia, mas sozinho não consigo levar isso adiante.']
+    ],
+    'votacao-online': [
+      [/comunic|mensag|whats|lembrete|material/, 'Se você me ajudar com uma mensagem pronta para mandar no grupo, pode ajudar.'],
+      [/prazo|data|quórum|quorum/, 'O prazo acaba em duas semanas e estamos longe do quórum.'],
+      [/.*/, 'O problema é que o pessoal não entra para votar. Não é que sejam contra.']
+    ],
+    'sindico-sumido': [
+      [/rápido|minuto|breve|objetiv/, 'Tá, fala. Mas eu cuido de três prédios, não tenho tempo para reunião longa.'],
+      [/econom|benefíc|valor|redu/, 'Economia todo mundo promete. Quanto, exatamente, para os meus prédios?'],
+      [/.*/, 'Olha, me manda por WhatsApp que eu vejo quando der.']
+    ],
+    'reconquista-p45': [
+      [/urgent|falta|abastec|segur/, 'É, a falta de gás me preocupa. Semana passada quase ficamos sem.'],
+      [/contrato|prazo|compromisso|fidelidade/, 'Qual o prazo do contrato? Não quero ficar preso de novo.'],
+      [/.*/, 'Mas quanto tempo leva para ligar o gás natural aqui?']
+    ],
+    'prova-social': [
+      [/condomínio|prédio|síndico|vizinh|referência/, 'Me passa o contato do síndico de lá que eu mesmo ligo.'],
+      [/satisf|economi|resultado/, 'E eles estão satisfeitos mesmo, ou é só o que vocês dizem?'],
+      [/.*/, 'Sem saber de ninguém aqui da cidade que já fez, fica difícil eu levar ao conselho.']
     ]
   };
   const rules = map[sim.id] || [[/.*/, 'Preciso pensar e conversar internamente.']];
@@ -4942,7 +5622,7 @@ function calcNecta20(updateOpp=true){
 function populateCalcOpps(){
   const el=document.getElementById('c-opp');
   if(!el || !store) return;
-  const open=(store.opportunities||[]).filter(o=>o.stage!=='Contrato fechado');
+  const open=(store.opportunities||[]).filter(o=>!isClosedOpp(o));
   const selected=currentOppId && open.some(o=>o.id===currentOppId)?currentOppId:'';
   el.innerHTML='<option value="">Selecione uma oportunidade</option>'+open.map(o=>`<option value="${o.id}" ${o.id===selected?'selected':''}>${escapeHtml(o.name||'Sem nome')}</option>`).join('');
 }
@@ -5119,12 +5799,11 @@ function toggleLib(i){
    ============================================================ */
 function renderResults(){
   try {
-    const udasTreino = store.stats.points ? Math.round(store.stats.points / 4.7) : 0;
-    const udasFechadas = udasClosedThisMonth();
-    const udas = udasFechadas + udasTreino;
-    const META = 240;
-    const pct = Math.min(100, Math.round(udas / META * 100));
-    const pipeline = store.opportunities.filter(o => o.stage !== 'Contrato fechado').reduce((s,o) => s + (o.potentialUDA || 0), 0);
+    const g = goalStatsV45();
+    const udasFechadas = g.fechadas;
+    const udas = g.realizado;
+    const META = g.meta;
+    const pct = g.pct;
     const treinos = store.trainings.length;
     const sims = store.simulations.length;
     const acertos = treinos ? Math.round(store.trainings.filter(t => t.correct).length / treinos * 100) : 78;
@@ -5144,13 +5823,17 @@ function renderResults(){
       ` : ''}
 
       <div class="card">
-        <div class="card-title">Meta do mês</div>
-        <div class="meta-row"><div class="meta-num">${udas}<span> / ${META} UDAs</span></div></div>
+        <button class="btn-primary" style="margin-bottom:12px" onclick="openWeeklyV46(0)">📊 FECHAMENTO SEMANAL</button>
+        <div class="card-title">Meta do mês <span class="badge-count" style="cursor:pointer" onclick="nav('config')">⚙️ ajustar</span></div>
+        <div class="meta-row"><div class="meta-num">${fmtN(udas)}<span> / ${fmtN(META)} UDAs · ${pct}%</span></div></div>
         <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
         <div class="meta-stats">
-          <div class="meta-stat"><div class="v">${pipeline}</div><div class="l">Em pipeline</div></div>
-          <div class="meta-stat"><div class="v">${udas}</div><div class="l">Realizadas</div></div>
-          <div class="meta-stat"><div class="v">${store.opportunities.length}</div><div class="l">Oport.</div></div>
+          <div class="meta-stat"><div class="v">${fmtN(g.ativo)}</div><div class="l">Pipeline ativo</div></div>
+          <div class="meta-stat"><div class="v">${fmtN(g.global)}</div><div class="l">Global</div></div>
+          <div class="meta-stat"><div class="v" style="color:var(--verde)">${fmtN(g.fechadas)}</div><div class="l">Fechadas no mês</div></div>
+        </div>
+        <div style="font-size:12.5px;color:var(--texto-sec);margin-top:10px;line-height:1.45">
+          <b>Ativo</b>: oportunidades em negociação (da visita técnica em diante). <b>Global</b>: todas em aberto${g.extra ? ` + ${fmtN(g.extra)} UDA de leads fora do app` : ''}.${g.treino ? ` Inclui ${fmtN(g.treino)} UDA de pontos de treino.` : ''}
         </div>
       </div>
 
@@ -5424,6 +6107,10 @@ function renderConfig(){
     if(el('cfg-openai-key')) el('cfg-openai-key').value = s.openaiKey || '';
     if(el('cfg-proxy-url')) el('cfg-proxy-url').value = s.proxyUrl || '';
     if(el('cfg-proxy-token')) el('cfg-proxy-token').value = s.proxyToken || '';
+    if(el('cfg-goal')) el('cfg-goal').value = s.goalMonthly || 240;
+    if(el('cfg-goal-extra')) el('cfg-goal-extra').value = s.goalExtraGlobal || '';
+    if(el('cfg-goal-training')) el('cfg-goal-training').checked = !!s.goalCountTraining;
+    for(let d = 1; d <= 5; d++){ if(el('cfg-route-' + d)) el('cfg-route-' + d).value = (s.routes || {})[d] || ''; }
     if(el('cfg-model')) el('cfg-model').value = s.model || 'gpt-4o-mini';
     if(el('cfg-voice-switch')) el('cfg-voice-switch').classList.toggle('on', s.voice !== false);
     if(el('cfgCountOps')) el('cfgCountOps').textContent = store.opportunities.length;
@@ -5473,6 +6160,25 @@ function saveAIConfig(){
   const el = document.getElementById('cfgAIMode');
   if(el) el.textContent = hasAI() ? (store.settings.authMode === 'proxy' ? 'Proxy seguro' : 'Chave direta') : 'Offline';
   showToast(hasAI() ? 'IA configurada ✓' : 'Configuração salva · modo offline');
+}
+function saveGoalV45(){
+  const goal = parseInt(document.getElementById('cfg-goal').value, 10);
+  if(!goal || goal < 1){ showToast('Informe uma meta válida'); return; }
+  store.settings.goalMonthly = goal;
+  store.settings.goalExtraGlobal = Math.max(0, parseInt(document.getElementById('cfg-goal-extra').value, 10) || 0);
+  store.settings.goalCountTraining = document.getElementById('cfg-goal-training').checked;
+  saveStore();
+  showToast('Meta salva ✓');
+}
+function saveRoutesV43(){
+  const routes = {};
+  for(let d = 1; d <= 5; d++){
+    const v = (document.getElementById('cfg-route-' + d)?.value || '').trim();
+    if(v) routes[d] = v;
+  }
+  store.settings.routes = routes;
+  saveStore();
+  showToast('Rotas salvas ✓');
 }
 function toggleVoice(){
   store.settings.voice = !store.settings.voice;
@@ -6759,6 +7465,7 @@ function importData(ev){
       saveProposals(proposals);
       saveDiagChecklist(diagChecklist);
       if(_tariffs) saveTariffs(tariffs);
+      migrateStagesV43();
       showToast('Backup importado ✓');
       renderConfig();
       nav('home');
@@ -6813,6 +7520,8 @@ document.addEventListener('click', e => {
 (function bootstrap(){
   function start(){
     try {
+      // 0. Converte etapas antigas para o funil Necta
+      if(typeof migrateStagesV43 === 'function') migrateStagesV43();
       // 1. Inicializa a Parte 3 (telas e lógica base)
       if(typeof initPart3 === 'function'){
         initPart3();
